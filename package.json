@@ -1,0 +1,17 @@
+{
+  "name": "wk-workout-tracker",
+  "version": "7.0.0",
+  "description": "WK Workout Tracker — Military Hardcore UI + PWA",
+  "private": true,
+  "scripts": {
+    "dev":        "vite",
+    "build":      "vite build",
+    "build:gh":   "VITE_BASE=/wk-workout-tracker/ vite build",
+    "preview":    "vite preview",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0"
+  }
+}

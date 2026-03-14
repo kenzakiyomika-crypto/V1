@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WK">
+<meta name="theme-color" content="#e8730a">
+<meta name="description" content="WK Workout Tracker — ออกกำลังกาย วิ่ง ว่ายน้ำ ทหาร">
+<title>WK — MILITARY TRACKER</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Share+Tech+Mono&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS — MILITARY HARDCORE v7
+═══════════════════════════════════════════ */
+:root{
+  --void:#080a07;--ground:#0d0f0b;--bunker:#141710;--trench:#1c2018;
+  --camo:#252b20;--wire:#2e3628;--fog:#3a4232;
+  --orange:#e8730a;--orange-hi:#ff8c1a;--orange-lo:#7a3d05;--orange-bg:#1a0d03;
+  --green:#4aff6e;--green-hi:#7dff97;--green-lo:#1a7a30;--green-bg:#031008;--green-dim:#2a5e38;
+  --red:#d62828;--red-hi:#ff3333;--red-bg:#1a0505;
+  --blue:#3d8eff;--blue-bg:#00131a;--blue-dim:#004466;
+  --purple:#a855f7;--purple-bg:#0a0015;--purple-dim:#4a1a7a;
+  --teal:#00d4aa;--teal-bg:#001a15;--teal-dim:#00553d;
+  --text:#c8cfc0;--text-hi:#e8f0dc;--text-dim:#6b7560;--text-dead:#3a4030;
+  --fh:'Barlow Condensed',sans-serif;
+  --fm:'Share Tech Mono',monospace;
+  --fb:'Noto Sans Thai',sans-serif;
+  --sb:env(safe-area-inset-bottom,0px);
+  --st:env(safe-area-inset-top,0px);
+  --tbh:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;-webkit-text-size-adjust:100%;}
+body{
+  background:var(--void);color:var(--text);font-family:var(--fb);
+  min-height:100dvh;padding-bottom:calc(var(--tbh) + var(--sb));
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.1) 3px,rgba(0,0,0,.1) 4px);
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(74,255,110,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(74,255,110,.016) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+
+/* ── HEADER ── */
+.hdr{
+  position:sticky;top:0;z-index:50;background:rgba(8,10,7,.95);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--wire);padding:0 14px;
+  padding-top:var(--st);display:flex;align-items:center;gap:10px;
+  height:calc(52px + var(--st));
+}
+.hdr::before,.hdr::after{content:'';position:absolute;width:10px;height:10px;border-color:var(--orange);border-style:solid;}
+.hdr::before{top:calc(var(--st) + 5px);left:5px;border-width:1.5px 0 0 1.5px;}
+.hdr::after{top:calc(var(--st) + 5px);right:5px;border-width:1.5px 1.5px 0 0;}
+.callsign{font-family:var(--fh);font-size:1.85rem;font-weight:900;letter-spacing:7px;color:var(--orange);line-height:1;flex-shrink:0;text-shadow:0 0 18px rgba(232,115,10,.55);animation:glitch 9s infinite;}
+@keyframes glitch{0%,94%,100%{text-shadow:0 0 18px rgba(232,115,10,.55);transform:none;}95%{text-shadow:-2px 0 var(--green),2px 0 var(--red);transform:translateX(1px);}96%{text-shadow:2px 0 var(--green),-2px 0 var(--red);transform:translateX(-1px);}97%{text-shadow:0 0 18px rgba(232,115,10,.55);transform:none;}}
+.hdr-mid{flex:1;min-width:0;}
+.hdr-tag{font-family:var(--fm);font-size:.54rem;color:var(--text-dead);letter-spacing:2px;text-transform:uppercase;}
+.hdr-mission{font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:2px;color:var(--text-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-btns{display:flex;gap:6px;flex-shrink:0;}
+.hbtn{width:34px;height:34px;background:var(--trench);border:1px solid var(--wire);border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.82rem;color:var(--text-dim);transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.hbtn:active{background:var(--camo);color:var(--orange);border-color:var(--orange);}
+.pdot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 6px var(--green);animation:pd 2s infinite;}
+@keyframes pd{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.6);}}
+
+/* ── PANELS ── */
+.panel{display:none;padding:13px;max-width:680px;margin:0 auto;position:relative;z-index:1;}
+.panel.on{display:block;animation:pin .18s ease;}
+@keyframes pin{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:center;gap:9px;margin-bottom:13px;padding-bottom:7px;border-bottom:1px solid var(--wire);}
+.sh::before{content:'';width:3px;height:18px;background:var(--orange);border-radius:2px;box-shadow:0 0 7px var(--orange-lo);flex-shrink:0;}
+.sh-title{font-family:var(--fh);font-size:1.05rem;font-weight:900;letter-spacing:4px;color:var(--text-hi);text-transform:uppercase;}
+.sh-badge{font-family:var(--fm);font-size:.55rem;color:var(--text-dead);letter-spacing:1px;margin-left:auto;}
+.sh.green::before{background:var(--green);box-shadow:0 0 7px var(--green-lo);}
+.sh.blue::before{background:var(--blue);box-shadow:0 0 7px var(--blue-dim);}
+.sh.purple::before{background:var(--purple);box-shadow:0 0 7px var(--purple-dim);}
+
+/* ── TACTICAL BUTTON ── */
+.tbtn{display:inline-flex;align-items:center;justify-content:center;gap:5px;background:transparent;border:1px solid var(--orange);color:var(--orange);padding:8px 14px;font-family:var(--fh);font-size:.82rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:3px;transition:all .12s;white-space:nowrap;-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden;}
+.tbtn::before{content:'';position:absolute;inset:0;background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform .12s ease;z-index:0;}
+.tbtn:hover::before,.tbtn:active::before{transform:scaleX(1);}
+.tbtn:hover,.tbtn:active{color:var(--void);}
+.tbtn>*{position:relative;z-index:1;}
+.tbtn.sm{padding:5px 10px;font-size:.7rem;}
+.tbtn.xs{padding:3px 8px;font-size:.64rem;}
+.tbtn.ghost{border-color:var(--wire);color:var(--text-dim);}
+.tbtn.ghost::before{background:var(--camo);}
+.tbtn.ghost:hover,.tbtn.ghost:active{color:var(--text-hi);}
+.tbtn.red{border-color:var(--red);color:var(--red);}
+.tbtn.red::before{background:var(--red);}
+.tbtn.red:hover,.tbtn.red:active{color:#fff;}
+.tbtn.green{border-color:var(--green);color:var(--green);}
+.tbtn.green::before{background:var(--green);}
+.tbtn.green:hover,.tbtn.green:active{color:var(--void);}
+.tbtn.blue{border-color:var(--blue);color:var(--blue);}
+.tbtn.blue::before{background:var(--blue);}
+.tbtn.blue:hover,.tbtn.blue:active{color:#fff;}
+.tbtn.teal{border-color:var(--teal);color:var(--teal);}
+.tbtn.teal::before{background:var(--teal);}
+.tbtn.teal:hover,.tbtn.teal:active{color:var(--void);}
+.tbtn.full{width:100%;}
+.tbtn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* ── FORM ELEMENTS ── */
+.finp{background:var(--trench);border:1px solid var(--wire);border-bottom:1px solid var(--fog);color:var(--text-hi);padding:8px 10px;font-family:var(--fm);font-size:.82rem;border-radius:3px;outline:none;transition:border-color .14s;-webkit-appearance:none;width:100%;}
+.finp:focus{border-color:var(--orange);}
+.finp::placeholder{color:var(--text-dead);}
+select.finp{cursor:pointer;}
+textarea.finp{resize:vertical;font-family:var(--fm);font-size:.76rem;min-height:100px;line-height:1.7;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.fgrid.t3{grid-template-columns:1fr 1fr 1fr;}
+.ff{display:flex;flex-direction:column;gap:4px;}
+.flbl{font-family:var(--fm);font-size:.56rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;}
+input[type=range]{width:100%;-webkit-appearance:none;height:4px;background:var(--trench);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:3px;background:var(--orange);border:2px solid var(--void);cursor:pointer;box-shadow:0 0 7px rgba(232,115,10,.4);transition:transform .1s;}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.2);}
+
+/* ── CARDS / CONTAINERS ── */
+.fc{background:var(--bunker);border:1px solid var(--wire);border-radius:4px;padding:13px;margin-bottom:11px;}
+.fc-title{font-family:var(--fh);font-size:.85rem;font-weight:900;letter-spacing:3px;color:var(--orange);margin-bottom:11px;padding-bottom:6px;border-bottom:1px solid var(--wire);text-transform:uppercase;}
+.fc-title.green{color:var(--green);}
+.fc-title.blue{color:var(--blue);}
+.fc-title.purple{color:var(--purple);}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:13px;}
+.stat-card{background:var(--bunker);border:1px solid var(--wire);border-radius:4px;padding:13px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--orange),transparent);}
+.stat-card.green::before{background:linear-gradient(90deg,var(--green),transparent);}
+.stat-card.blue::before{background:linear-gradient(90deg,var(--blue),transparent);}
+.sv{font-family:var(--fh);font-size:2.1rem;font-weight:900;color:var(--orange-hi);letter-spacing:2px;line-height:1;text-shadow:0 0 18px rgba(232,115,10,.25);}
+.sl{font-family:var(--fm);font-size:.56rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+.ss{font-family:var(--fm);font-size:.58rem;color:var(--green-dim);margin-top:2px;}
+
+/* ── MUSCLE BARS ── */
+.mbar-row{margin-bottom:7px;}
+.mbar-head{display:flex;justify-content:space-between;font-size:.68rem;margin-bottom:3px;color:var(--text-dim);}
+.mbar-head span:last-child{font-family:var(--fm);color:var(--text);}
+.mbar-track{height:5px;background:var(--trench);border-radius:2px;overflow:hidden;}
+.mbar-fill{height:100%;border-radius:2px;transition:width .65s ease;}
+
+/* ── EXERCISE CARD ── */
+.exc{background:var(--bunker);border:1px solid var(--wire);border-radius:4px;margin-bottom:9px;overflow:hidden;transition:border-color .2s;position:relative;}
+.exc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--wire);transition:background .2s,box-shadow .2s;}
+.exc.active::before{background:var(--orange);box-shadow:0 0 8px var(--orange-lo);}
+.exc.done::before{background:var(--green);box-shadow:0 0 8px var(--green-lo);}
+.exc.done{border-color:var(--green-dim);background:rgba(3,16,8,.7);}
+.exc-head{display:flex;align-items:center;padding:11px 13px 11px 17px;gap:9px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;}
+.exc-idx{font-family:var(--fm);font-size:.58rem;color:var(--text-dead);min-width:22px;flex-shrink:0;}
+.exc-name{font-family:var(--fh);font-size:1.1rem;font-weight:700;letter-spacing:2px;color:var(--text-hi);flex:1;text-transform:uppercase;}
+.exc.done .exc-name{color:var(--green);}
+.exc-meta{font-family:var(--fm);font-size:.63rem;color:var(--text-dim);white-space:nowrap;}
+.exc-prog{display:flex;align-items:center;gap:5px;}
+.exc-prog-track{width:40px;height:3px;background:var(--trench);border-radius:2px;overflow:hidden;}
+.exc-prog-fill{height:100%;background:var(--orange);border-radius:2px;transition:width .3s;}
+.exc.done .exc-prog-fill{background:var(--green);}
+.exc-prog-txt{font-family:var(--fm);font-size:.6rem;color:var(--orange);min-width:22px;text-align:right;}
+.exc.done .exc-prog-txt{color:var(--green);}
+.exc-chev{color:var(--text-dead);font-size:.5rem;transition:transform .2s;flex-shrink:0;}
+.exc.coll .exc-chev{transform:rotate(-90deg);}
+.set-body{overflow:hidden;transition:max-height .25s ease;}
+.exc.coll .set-body{max-height:0!important;}
+.set-grid{padding:4px 17px 10px;display:flex;flex-wrap:wrap;gap:8px;}
+
+/* ── SET BUTTON ── */
+.sbt{position:relative;width:56px;height:56px;background:var(--trench);border:1.5px solid var(--wire);border-radius:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .13s;-webkit-tap-highlight-color:transparent;overflow:hidden;}
+.sbt::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,var(--orange) 0%,transparent 70%);opacity:0;transition:opacity .3s;border-radius:4px;}
+.sbt:hover:not(.dn){border-color:var(--orange);background:var(--orange-bg);}
+.sbt:active:not(.dn){transform:scale(.91);border-color:var(--orange-hi);}
+.sbt:active:not(.dn)::after{opacity:.18;}
+.sbt .sn{font-family:var(--fm);font-size:.48rem;color:var(--text-dead);letter-spacing:1px;line-height:1;}
+.sbt .si{font-size:1.1rem;line-height:1;transition:transform .2s;}
+.sbt:hover:not(.dn) .si{transform:scale(1.12);}
+.sbt.dn{background:var(--green-bg);border-color:var(--green-dim);animation:sconf .32s ease;}
+.sbt.dn .sn{color:var(--green-dim);}
+.sbt.dn .si{color:var(--green);text-shadow:0 0 10px var(--green);}
+@keyframes sconf{0%{transform:scale(.88);background:rgba(74,255,110,.18);}45%{transform:scale(1.1);}72%{transform:scale(.97);}100%{transform:scale(1);}}
+.exc-foot{border-top:1px solid var(--wire);padding:6px 17px;display:flex;gap:6px;flex-wrap:wrap;background:rgba(0,0,0,.18);}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 16px;color:var(--text-dim);}
+.empty-ico{font-size:2.4rem;display:block;margin-bottom:10px;filter:grayscale(1) opacity(.35);}
+.empty-ttl{font-family:var(--fh);font-size:1.05rem;letter-spacing:3px;color:var(--text-dead);margin-bottom:5px;}
+.empty-sub{font-size:.73rem;color:var(--text-dead);line-height:1.65;}
+
+/* ── OP BAR ── */
+.op-bar{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap;}
+.op-input{flex:1;min-width:130px;background:var(--bunker);border:1px solid var(--wire);border-left:3px solid var(--orange);color:var(--text-hi);padding:9px 11px;font-family:var(--fm);font-size:.8rem;letter-spacing:1px;border-radius:3px;outline:none;transition:border-color .15s;}
+.op-input:focus{border-color:var(--orange);border-left-color:var(--orange-hi);}
+.op-input::placeholder{color:var(--text-dead);}
+.rest-ctl{display:flex;align-items:center;gap:5px;background:var(--bunker);border:1px solid var(--wire);border-radius:3px;padding:6px 10px;font-family:var(--fm);font-size:.7rem;color:var(--text-dim);}
+.rest-ctl input{width:36px;background:transparent;border:none;border-bottom:1px solid var(--wire);color:var(--orange);font-family:var(--fm);font-size:.84rem;text-align:center;outline:none;}
+
+/* ── TABS (sub-tabs inside panels) ── */
+.sub-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px;overflow-x:auto;padding-bottom:3px;}
+.stab{background:var(--bunker);border:1px solid var(--wire);color:var(--text-dim);padding:5px 11px;border-radius:3px;font-family:var(--fm);font-size:.66rem;letter-spacing:1px;cursor:pointer;transition:all .13s;-webkit-tap-highlight-color:transparent;white-space:nowrap;}
+.stab.on{background:var(--orange-bg);border-color:var(--orange);color:var(--orange);}
+.stab.green.on{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.stab.blue.on{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);}
+
+/* ── HISTORY ITEMS ── */
+.hist-item{background:var(--bunker);border:1px solid var(--wire);border-left:3px solid var(--wire);border-radius:3px;padding:9px 12px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:flex-start;gap:9px;transition:border-left-color .2s;}
+.hist-item:hover{border-left-color:var(--orange);}
+.h-name{font-family:var(--fh);font-size:.9rem;font-weight:700;letter-spacing:1px;color:var(--text-hi);}
+.h-sub{font-size:.66rem;color:var(--text-dim);margin-top:2px;font-family:var(--fm);}
+.h-val{font-family:var(--fm);font-size:1.1rem;color:var(--orange);white-space:nowrap;text-align:right;flex-shrink:0;}
+.h-pr{font-size:.6rem;color:var(--orange);display:block;margin-top:2px;text-align:right;}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:2px;font-family:var(--fm);font-size:.6rem;font-weight:700;letter-spacing:1px;}
+.badge.pass{background:#001500;color:var(--green);border:1px solid var(--green-dim);}
+.badge.fail{background:var(--red-bg);color:var(--red);border:1px solid #4a0000;}
+.badge.elite{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-lo);}
+.badge.info{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-dim);}
+
+/* ── CHART ── */
+.chart-wrap{background:var(--bunker);border:1px solid var(--wire);border-radius:4px;padding:13px;margin-bottom:13px;}
+.chart-wrap h3{font-family:var(--fm);font-size:.65rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:9px;}
+canvas.prog-canvas{width:100%!important;height:170px!important;}
+
+/* ── FILTERS BAR ── */
+.filters{display:flex;gap:4px;overflow-x:auto;padding-bottom:3px;margin-bottom:11px;}
+.fb{background:var(--trench);border:1px solid var(--wire);color:var(--text-dim);padding:4px 11px;border-radius:3px;font-size:.7rem;cursor:pointer;font-family:var(--fb);white-space:nowrap;transition:all .12s;}
+.fb.on{background:var(--orange-bg);color:var(--orange);border-color:var(--orange);}
+
+/* ── PRESET ── */
+.preset-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:13px;}
+.preset-card{background:var(--bunker);border:1.5px solid var(--wire);border-radius:4px;padding:13px;cursor:pointer;transition:all .15s;}
+.preset-card:hover,.preset-card:active{border-color:var(--orange);background:var(--orange-bg);}
+.preset-card h3{font-family:var(--fh);font-size:1.05rem;font-weight:900;letter-spacing:3px;color:var(--orange);margin-bottom:3px;text-transform:uppercase;}
+.preset-card p{font-size:.72rem;color:var(--text-dim);line-height:1.4;}
+.preset-card .ptag{display:inline-block;background:var(--trench);border-radius:2px;padding:1px 6px;font-size:.6rem;font-family:var(--fm);color:var(--text-dim);margin-top:4px;}
+.day-tabs{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;}
+.dtab{background:var(--trench);border:1px solid var(--wire);color:var(--text-dim);padding:4px 11px;border-radius:3px;font-size:.72rem;cursor:pointer;white-space:nowrap;transition:all .12s;}
+.dtab.on{background:var(--orange);color:var(--void);border-color:var(--orange);font-weight:700;}
+.preset-exs{background:var(--trench);border-radius:3px;overflow:hidden;}
+.preset-ex{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--wire);font-size:.82rem;}
+.preset-ex:last-child{border:none;}
+.preset-ex .pen{font-family:var(--fh);font-weight:700;letter-spacing:1px;color:var(--text-hi);}
+.preset-ex .pem{font-family:var(--fm);font-size:.68rem;color:var(--text-dim);}
+
+/* ── IMPORT ── */
+.methods{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:11px;}
+.mth{background:var(--bunker);border:1.5px solid var(--wire);border-radius:4px;padding:12px 7px;text-align:center;cursor:pointer;color:var(--text-dim);font-size:.75rem;transition:all .13s;}
+.mth.on{border-color:var(--orange);color:var(--orange);background:var(--orange-bg);}
+.mth .mi{font-size:1.3rem;display:block;margin-bottom:3px;}
+.import-zone{background:var(--bunker);border:1.5px dashed var(--wire);border-radius:4px;padding:12px;margin-bottom:9px;min-height:90px;}
+.drop-a{text-align:center;padding:20px 14px;color:var(--text-dead);font-size:.78rem;cursor:pointer;}
+.drop-a .di{font-size:1.6rem;display:block;margin-bottom:5px;}
+.drop-a.over{background:var(--orange-bg);color:var(--orange);}
+.file-inp{display:none;}
+.parsed-card{background:var(--trench);border-radius:4px;padding:12px;margin-top:10px;}
+.parsed-card h3{font-family:var(--fm);font-size:.65rem;color:var(--text-dim);margin-bottom:9px;letter-spacing:1px;text-transform:uppercase;}
+.pi{display:flex;align-items:center;gap:5px;padding:5px 0;border-bottom:1px solid var(--wire);flex-wrap:wrap;font-size:.8rem;}
+.pi:last-child{border:none;}
+.pi .pn{flex:1;font-family:var(--fh);font-weight:700;letter-spacing:1px;color:var(--text-hi);min-width:90px;}
+.fg{display:flex;align-items:center;gap:3px;font-size:.68rem;color:var(--text-dim);}
+.fg input{width:38px;padding:2px 4px;font-family:var(--fm);font-size:.74rem;background:var(--bunker);border:1px solid var(--wire);color:var(--text-hi);border-radius:2px;outline:none;}
+.parse-tag{display:inline-flex;align-items:center;gap:3px;background:var(--teal-bg);border:1px solid var(--teal-dim);color:var(--teal);border-radius:2px;padding:2px 7px;font-size:.63rem;font-family:var(--fm);margin-bottom:7px;}
+
+/* ── PROFILE ── */
+.prof-hero{background:linear-gradient(135deg,var(--bunker) 0%,#0d150e 100%);border:1px solid var(--wire);border-radius:4px;padding:18px;margin-bottom:13px;display:flex;align-items:center;gap:14px;}
+.prof-ava{width:54px;height:54px;background:var(--orange-bg);border:2px solid var(--orange);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:1.5rem;font-weight:900;color:var(--orange);flex-shrink:0;}
+.prof-name{font-family:var(--fh);font-size:1.35rem;font-weight:900;letter-spacing:3px;color:var(--text-hi);line-height:1;}
+.prof-lvl{font-family:var(--fm);font-size:.6rem;color:var(--green);letter-spacing:2px;margin-top:3px;}
+.prof-stats{display:flex;gap:14px;margin-top:7px;}
+.pstat-v{font-family:var(--fm);font-size:.92rem;color:var(--orange);font-weight:bold;}
+.pstat-l{font-family:var(--fm);font-size:.53rem;color:var(--text-dead);letter-spacing:1px;}
+.prof-complete{display:flex;align-items:center;gap:9px;background:var(--trench);border:1px solid var(--wire);border-radius:4px;padding:10px 12px;margin-bottom:12px;}
+.pc-track{flex:1;height:5px;background:var(--camo);border-radius:2px;overflow:hidden;}
+.pc-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--teal));border-radius:2px;transition:width .5s ease;}
+.goal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.goal-chip{background:var(--trench);border:1.5px solid var(--wire);border-radius:4px;padding:9px 11px;cursor:pointer;text-align:center;transition:all .13s;}
+.goal-chip.on{border-color:var(--orange);background:var(--orange-bg);}
+.goal-chip .gc-icon{font-size:1.3rem;display:block;margin-bottom:3px;}
+.goal-chip .gc-name{font-family:var(--fh);font-size:.82rem;font-weight:700;letter-spacing:1px;color:var(--text-hi);}
+.goal-chip .gc-desc{font-size:.63rem;color:var(--text-dim);margin-top:2px;}
+.goal-chip.on .gc-name{color:var(--orange);}
+
+/* ── PLANNER ── */
+.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;}
+.style-card{background:var(--bunker);border:1.5px solid var(--wire);border-radius:4px;padding:11px;cursor:pointer;transition:all .13s;}
+.style-card:hover,.style-card.on{border-color:var(--orange);background:var(--orange-bg);}
+.style-card h4{font-family:var(--fh);font-size:.88rem;font-weight:700;letter-spacing:1px;margin-bottom:2px;}
+.style-card p{font-size:.68rem;color:var(--text-dim);}
+.style-card.on h4{color:var(--orange);}
+.plan-day-card{background:var(--trench);border-radius:4px;overflow:hidden;margin-bottom:7px;border:1px solid var(--wire);}
+.plan-day-head{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;cursor:pointer;}
+.plan-day-head .pd-name{font-family:var(--fh);font-weight:700;font-size:.9rem;letter-spacing:2px;color:var(--text-hi);}
+.plan-day-exs{border-top:1px solid var(--wire);display:none;}
+.plan-day-card.open .plan-day-exs{display:block;}
+.plan-ex-row{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid var(--wire);font-size:.8rem;}
+.plan-ex-row:last-child{border:none;}
+.plan-ex-name{font-family:var(--fh);font-weight:700;letter-spacing:1px;color:var(--text-hi);}
+.plan-ex-meta{font-family:var(--fm);font-size:.68rem;color:var(--text-dim);}
+.plan-day-load{font-size:.66rem;padding:3px 9px;background:var(--orange);color:var(--void);border:none;border-radius:3px;cursor:pointer;font-family:var(--fh);font-weight:700;letter-spacing:1px;}
+.saved-plan-card{background:var(--bunker);border:1px solid var(--wire);border-radius:4px;padding:10px 12px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;gap:9px;}
+.saved-plan-name{font-family:var(--fh);font-weight:700;letter-spacing:2px;color:var(--text-hi);font-size:.88rem;}
+.saved-plan-meta{font-family:var(--fm);font-size:.62rem;color:var(--text-dim);margin-top:2px;}
+
+/* ── MILITARY STANDARDS ── */
+.std-card{background:var(--bunker);border:1px solid var(--wire);border-radius:4px;overflow:hidden;}
+.std-head{background:linear-gradient(90deg,var(--orange-bg),var(--bunker));padding:11px 14px;border-bottom:1px solid var(--wire);display:flex;align-items:center;gap:10px;}
+.std-icon{font-size:1.5rem;}
+.std-name{font-family:var(--fh);font-size:1.1rem;font-weight:900;letter-spacing:3px;color:var(--orange);}
+.std-desc{font-family:var(--fm);font-size:.6rem;color:var(--text-dim);margin-top:2px;}
+table.std{width:100%;border-collapse:collapse;}
+table.std th{font-family:var(--fm);font-size:.56rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-dead);padding:7px 11px;text-align:left;border-bottom:1px solid var(--wire);background:rgba(0,0,0,.18);}
+table.std td{padding:8px 11px;font-size:.78rem;border-bottom:1px solid var(--trench);}
+table.std tr:last-child td{border:none;}
+.std-ev{font-family:var(--fh);font-size:.88rem;font-weight:700;letter-spacing:1px;color:var(--text-hi);}
+.std-pv{font-family:var(--fm);font-size:.7rem;color:var(--green);}
+.std-ev2{font-family:var(--fm);font-size:.7rem;color:var(--orange);}
+
+/* ── COUNTDOWN ── */
+.cd-hero{background:linear-gradient(135deg,#000 0%,#0a0a1a 50%,#001a00 100%);border:1px solid var(--orange-lo);border-radius:4px;padding:18px;margin-bottom:13px;text-align:center;}
+.cd-big{font-family:var(--fh);font-size:4.5rem;line-height:1;letter-spacing:4px;color:var(--orange);text-shadow:0 0 28px rgba(232,115,10,.4);}
+.cd-big.urgent{color:var(--red);}
+.cd-big.soon{color:#ff9500;}
+.cd-lbl{font-family:var(--fm);font-size:.7rem;color:var(--orange-lo);letter-spacing:2px;text-transform:uppercase;margin-top:3px;}
+.cd-phase-badge{display:inline-block;padding:4px 13px;border-radius:2px;font-size:.7rem;font-family:var(--fm);font-weight:700;margin-top:8px;}
+.exam-card{background:var(--bunker);border:1.5px solid var(--wire);border-radius:4px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border-color .2s;}
+.exam-card.active-exam{border-color:var(--orange);background:var(--orange-bg);}
+.exam-card .ec-icon{font-size:1.8rem;flex-shrink:0;}
+.exam-card .ec-name{font-family:var(--fh);font-weight:700;font-size:.9rem;letter-spacing:1px;color:var(--text-hi);}
+.exam-card .ec-date{font-family:var(--fm);font-size:.68rem;color:var(--text-dim);margin-top:2px;}
+.exam-card .ec-days{font-family:var(--fh);font-size:1.5rem;font-weight:900;color:var(--orange);line-height:1;margin-left:auto;flex-shrink:0;}
+.phase-timeline{display:flex;margin:7px 0;border-radius:4px;overflow:hidden;}
+.phase-block{flex:1;padding:6px 5px;text-align:center;font-size:.6rem;font-family:var(--fm);line-height:1.4;}
+.phase-block .pb-name{font-weight:700;display:block;margin-bottom:2px;}
+.rec-item{font-size:.78rem;color:var(--text-dim);padding:4px 0;border-bottom:1px solid var(--wire);}
+.rec-item:last-child{border:none;}
+.rec-item::before{content:'→ ';color:var(--orange);}
+
+/* ── RUN ── */
+.run-hero{background:linear-gradient(135deg,var(--green-bg) 0%,var(--void) 100%);border:1px solid var(--green-dim);border-radius:4px;padding:15px;margin-bottom:13px;position:relative;overflow:hidden;}
+.run-hero::before{content:'RUN';position:absolute;right:-8px;top:-8px;font-family:var(--fh);font-size:4.5rem;font-weight:900;color:var(--green-dim);opacity:.06;letter-spacing:4px;pointer-events:none;}
+.run-ttl{font-family:var(--fh);font-size:1.45rem;font-weight:900;letter-spacing:5px;color:var(--green);text-shadow:0 0 14px rgba(74,255,110,.3);}
+.run-sub{font-family:var(--fm);font-size:.6rem;color:var(--green-dim);letter-spacing:2px;margin-top:2px;}
+.live-pace{font-family:var(--fm);font-size:.8rem;color:var(--green);min-height:17px;margin-bottom:6px;letter-spacing:1px;}
+.run-badge{display:inline-block;padding:2px 7px;border-radius:2px;font-size:.62rem;font-family:var(--fm);font-weight:700;margin-top:3px;}
+.run-badge.pr{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange-lo);}
+.run-badge.pass{background:var(--green-bg);color:var(--green);border:1px solid var(--green-dim);}
+
+/* ── SWIM ── */
+.swim-hero{background:linear-gradient(135deg,var(--blue-bg) 0%,var(--void) 100%);border:1px solid var(--blue-dim);border-radius:4px;padding:15px;margin-bottom:13px;}
+.swim-target-bar{margin:6px 0;}
+.swim-target-label{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text-dim);margin-bottom:3px;}
+.swim-target-track{height:5px;background:var(--trench);border-radius:2px;overflow:hidden;}
+.swim-target-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--teal));transition:width .5s ease;}
+.stroke-chip{display:inline-block;background:var(--blue-bg);border:1px solid var(--blue-dim);color:var(--blue);border-radius:2px;padding:2px 7px;font-size:.62rem;font-family:var(--fm);margin-top:3px;}
+.swim-hist-item{background:var(--bunker);border:1px solid var(--wire);border-left:3px solid var(--blue-dim);border-radius:3px;padding:10px 12px;margin-bottom:5px;}
+
+/* ── READINESS ── */
+.ready-hero{background:linear-gradient(135deg,var(--purple-bg) 0%,var(--void) 100%);border:1px solid var(--purple-dim);border-radius:4px;padding:18px;margin-bottom:13px;text-align:center;}
+.ready-big{font-family:var(--fh);font-size:5rem;font-weight:900;line-height:1;letter-spacing:4px;color:var(--purple);text-shadow:0 0 28px rgba(168,85,247,.4);}
+.ready-lbl{font-family:var(--fm);font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--purple-dim);margin-top:4px;}
+.slider-row{margin-bottom:12px;}
+.slbl{display:flex;justify-content:space-between;font-family:var(--fm);font-size:.6rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.slbl span:last-child{color:var(--text-hi);font-size:.74rem;}
+.readiness-hist-item{background:var(--bunker);border:1px solid var(--wire);border-radius:4px;padding:9px 11px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;}
+.r-score-mini{font-family:var(--fh);font-size:1.3rem;font-weight:900;line-height:1;}
+
+/* ── EXPORT ── */
+.export-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
+.exp-card{background:var(--bunker);border:1.5px solid var(--wire);border-radius:4px;padding:14px;cursor:pointer;text-align:center;transition:all .13s;}
+.exp-card:hover,.exp-card:active{border-color:var(--orange);background:var(--orange-bg);}
+.exp-card .ei2{font-size:1.7rem;display:block;margin-bottom:6px;}
+.exp-card h3{font-family:var(--fh);font-size:.95rem;font-weight:900;letter-spacing:2px;color:var(--orange);margin-bottom:3px;}
+.exp-card p{font-size:.68rem;color:var(--text-dim);}
+.export-textarea{width:100%;min-height:160px;background:var(--trench);border:1px solid var(--wire);color:var(--text-hi);padding:9px;font-family:var(--fm);font-size:.72rem;border-radius:3px;resize:vertical;outline:none;}
+.danger-btn{width:100%;padding:11px;background:transparent;border:1.5px solid var(--red);color:var(--red);border-radius:3px;font-size:.82rem;cursor:pointer;font-family:var(--fb);transition:all .13s;}
+.danger-btn:hover,.danger-btn:active{background:var(--red-bg);}
+.confirm-btn{flex:1;background:var(--red);border:1px solid var(--red);color:#fff;padding:9px;border-radius:3px;cursor:pointer;font-family:var(--fb);opacity:.5;}
+.confirm-btn:not(:disabled){opacity:1;}
+
+/* ── MORE (sub-panels menu) ── */
+.mitem{display:flex;align-items:center;gap:11px;background:var(--bunker);border:1px solid var(--wire);border-radius:3px;padding:11px 13px;margin-bottom:5px;cursor:pointer;transition:border-color .13s,background .13s;-webkit-tap-highlight-color:transparent;}
+.mitem:active{background:var(--trench);border-color:var(--orange);}
+.mico{font-size:1.15rem;width:26px;text-align:center;flex-shrink:0;}
+.mtxt{flex:1;}
+.mtitle{font-family:var(--fh);font-size:.88rem;font-weight:700;letter-spacing:2px;color:var(--text-hi);text-transform:uppercase;}
+.mdesc{font-size:.66rem;color:var(--text-dim);margin-top:2px;}
+.marr{color:var(--text-dead);font-size:.65rem;}
+
+/* ── REST BAR ── */
+.restbar{position:fixed;bottom:calc(var(--tbh) + var(--sb));left:0;right:0;background:var(--orange-bg);border-top:2px solid var(--orange);padding:8px 14px;display:flex;align-items:center;gap:9px;transform:translateY(100%);transition:transform .28s cubic-bezier(.34,1.3,.64,1);z-index:40;}
+.restbar.on{transform:translateY(0);}
+.rest-lbl{font-family:var(--fh);font-size:.75rem;letter-spacing:3px;color:var(--orange);flex-shrink:0;}
+.rest-cd{font-family:var(--fm);font-size:1.65rem;color:var(--orange-hi);min-width:52px;flex-shrink:0;text-shadow:0 0 12px rgba(232,115,10,.4);}
+.rest-trk{flex:1;height:3px;background:var(--wire);border-radius:2px;overflow:hidden;}
+.rest-fill{height:100%;background:var(--orange);border-radius:2px;box-shadow:0 0 5px var(--orange);transition:width 1s linear;}
+.rest-sc{display:flex;gap:3px;flex-shrink:0;}
+.rsc{background:var(--trench);border:1px solid var(--wire);color:var(--text-dim);padding:3px 6px;border-radius:3px;font-size:.6rem;font-family:var(--fm);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .1s;}
+.rsc:active{background:var(--orange);color:var(--void);border-color:var(--orange);}
+
+/* ── BOTTOM NAV ── */
+.botnav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tbh) + var(--sb));padding-bottom:var(--sb);background:rgba(8,10,7,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--wire);display:flex;align-items:stretch;z-index:60;}
+.botnav::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--orange) 50%,transparent);opacity:.35;}
+.ntab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .13s;padding-top:6px;position:relative;border:none;background:transparent;color:var(--text-dead);}
+.ntab::after{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%) scaleX(0);width:30px;height:2px;background:var(--orange);box-shadow:0 0 8px var(--orange);border-radius:0 0 2px 2px;transition:transform .22s cubic-bezier(.34,1.4,.64,1);}
+.ntab.on{color:var(--orange);}
+.ntab.on::after{transform:translateX(-50%) scaleX(1);}
+.ntab:active{opacity:.65;}
+.ntico{font-size:1.28rem;line-height:1;transition:transform .22s cubic-bezier(.34,1.4,.64,1);}
+.ntab.on .ntico{transform:translateY(-2px);filter:drop-shadow(0 0 5px var(--orange-lo));}
+.nlbl{font-family:var(--fh);font-size:.53rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;line-height:1;}
+
+/* ── MODALS / OVERLAYS ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:80;align-items:flex-end;justify-content:center;}
+.ov.on{display:flex;animation:ovfade .18s ease;}
+@keyframes ovfade{from{opacity:0;}to{opacity:1;}}
+.sheet{background:var(--ground);border:1px solid var(--wire);border-bottom:none;border-radius:8px 8px 0 0;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;padding:18px;padding-bottom:calc(18px + var(--sb));animation:sheetup .24s cubic-bezier(.34,1.2,.64,1);position:relative;}
+@keyframes sheetup{from{transform:translateY(55px);opacity:0;}to{transform:none;opacity:1;}}
+.sheet::before{content:'';display:block;width:38px;height:3px;background:var(--wire);border-radius:2px;margin:-6px auto 16px;}
+.sheet-title{font-family:var(--fh);font-size:1.25rem;font-weight:900;letter-spacing:4px;color:var(--orange);margin-bottom:14px;text-transform:uppercase;padding-bottom:9px;border-bottom:1px solid var(--wire);}
+.field{margin-bottom:11px;}
+.field label{display:block;font-family:var(--fm);font-size:.56rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.field input,.field select{width:100%;background:var(--trench);border:1px solid var(--wire);color:var(--text-hi);padding:9px 10px;font-family:var(--fm);font-size:.8rem;border-radius:3px;outline:none;-webkit-appearance:none;transition:border-color .14s;}
+.field input:focus,.field select:focus{border-color:var(--orange);}
+.sheet-acts{display:flex;gap:7px;margin-top:14px;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:calc(var(--tbh) + var(--sb) + 10px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--trench);border:1px solid var(--orange);color:var(--orange);padding:6px 16px;border-radius:3px;font-family:var(--fm);font-size:.72rem;letter-spacing:1px;white-space:nowrap;pointer-events:none;opacity:0;transition:all .24s cubic-bezier(.34,1.4,.64,1);z-index:70;box-shadow:0 0 18px rgba(232,115,10,.18);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.g{border-color:var(--green);color:var(--green);box-shadow:0 0 18px rgba(74,255,110,.15);}
+.toast.b{border-color:var(--blue);color:var(--blue);}
+
+/* ── PWA BANNER ── */
+#pwa-install{display:none;position:fixed;bottom:calc(var(--tbh) + var(--sb));left:0;right:0;background:var(--green-bg);border-top:1px solid var(--green-dim);padding:9px 14px;z-index:38;align-items:center;gap:9px;font-size:.78rem;font-family:var(--fm);color:var(--green);}
+#pwa-install.show{display:flex;}
+#pwa-install button{background:var(--green);color:var(--void);border:none;padding:5px 12px;border-radius:3px;font-weight:700;cursor:pointer;font-family:var(--fh);font-size:.75rem;letter-spacing:1px;flex-shrink:0;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-track{background:var(--void);}
+::-webkit-scrollbar-thumb{background:var(--wire);border-radius:2px;}
+
+/* ── UTILS ── */
+.mt8{margin-top:8px;}.mt13{margin-top:13px;}.mb8{margin-bottom:8px;}.mb13{margin-bottom:13px;}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="hdr">
+  <div class="callsign">WK</div>
+  <div class="hdr-mid">
+    <div class="hdr-tag">ACTIVE MISSION</div>
+    <div class="hdr-mission" id="mission-name">WORKOUT</div>
+  </div>
+  <div class="hdr-btns">
+    <div class="hbtn" onclick="openOv('ov-sw')" title="Stopwatch">⏱</div>
+    <div class="hbtn" title="Status"><div class="pdot"></div></div>
+  </div>
+</header>
+
+<!-- ══ PANEL: WORKOUT ══ -->
+<div id="panel-workout" class="panel on">
+  <div class="sh"><div class="sh-title">EXERCISES</div><div class="sh-badge" id="sess-date"></div></div>
+  <div class="op-bar">
+    <input type="text" class="op-input" id="sname" placeholder="MISSION NAME..."
+      oninput="document.getElementById('mission-name').textContent=this.value.toUpperCase()||'WORKOUT'">
+    <div class="rest-ctl">⏱<input type="number" id="def-rest" value="90" min="10" max="600">s</div>
+    <button class="tbtn sm" onclick="openAddEx()"><span>＋ ADD</span></button>
+    <button class="tbtn sm ghost" onclick="doResetSession()"><span>CLR</span></button>
+  </div>
+  <div id="rule-banner-workout"></div>
+  <div id="ex-list"></div>
+  <div id="no-ex" class="empty">
+    <span class="empty-ico">🏋️</span>
+    <div class="empty-ttl">NO EXERCISES LOADED</div>
+    <div class="empty-sub">กด <b style="color:var(--orange)">+ ADD</b> เพื่อเพิ่มท่า<br>หรือไปที่ <b style="color:var(--orange)">MORE → PROGRAMS</b></div>
+  </div>
+</div>
+
+<!-- ══ PANEL: DASHBOARD ══ -->
+<div id="panel-dashboard" class="panel">
+  <div class="sh"><div class="sh-title">SITREP</div></div>
+  <div class="sub-tabs">
+    <div class="stab on" onclick="switchDash('volume',this)">📦 VOLUME</div>
+    <div class="stab" onclick="switchDash('oneRM',this)">🏆 1RM</div>
+    <div class="stab" onclick="switchDash('freq',this)">🗓 FREQ</div>
+    <div class="stab" onclick="switchDash('fatigue',this)">🔥 FATIGUE</div>
+  </div>
+  <div id="dash-volume" class="dash-pnl on">
+    <div class="stat-grid" id="vol-stats"></div>
+    <div class="sh"><div class="sh-title">MUSCLE INTEL</div><div class="sh-badge">30D</div></div>
+    <div id="vol-muscle-bars"></div>
+    <div class="sh mt13"><div class="sh-title">VOLUME PER EXERCISE</div><div class="sh-badge">7D</div></div>
+    <div id="vol-exercise-list"></div>
+  </div>
+  <div id="dash-oneRM" class="dash-pnl" style="display:none">
+    <div class="sh"><div class="sh-title">ESTIMATED 1RM</div></div>
+    <p style="font-family:var(--fm);font-size:.65rem;color:var(--text-dim);margin-bottom:11px;letter-spacing:1px">1RM = weight × (1 + reps/30)</p>
+    <div id="oneRM-list"></div>
+    <div class="sh mt13"><div class="sh-title">1RM PROGRESS</div></div>
+    <div id="oneRM-chart-select" style="margin-bottom:7px"></div>
+    <div class="chart-wrap" id="oneRM-chart-wrap" style="display:none;margin-bottom:0"><canvas class="prog-canvas" id="oneRMChart"></canvas></div>
+  </div>
+  <div id="dash-freq" class="dash-pnl" style="display:none">
+    <div class="stat-grid" id="freq-stats"></div>
+    <div id="freq-muscle-list"></div>
+    <div class="sh mt13"><div class="sh-title">TOP EXERCISES</div><div class="sh-badge">30D</div></div>
+    <div id="freq-exercise-list"></div>
+  </div>
+  <div id="dash-fatigue" class="dash-pnl" style="display:none">
+    <div class="sh"><div class="sh-title">SYSTEMIC FATIGUE</div></div>
+    <div id="systemic-display" style="margin-bottom:16px"></div>
+    <div class="sh"><div class="sh-title">MUSCLE FATIGUE</div></div>
+    <div id="fatigue-muscle-list"></div>
+    <div class="sh mt13"><div class="sh-title">GROWTH INDEX</div></div>
+    <div id="growth-list"></div>
+  </div>
+</div>
+
+<!-- ══ PANEL: MILITARY ══ -->
+<div id="panel-military" class="panel">
+  <div class="sh"><div class="sh-title">MILITARY FITNESS</div></div>
+  <div class="sub-tabs">
+    <div class="stab on" onclick="switchMil('standards',this)">📋 STANDARDS</div>
+    <div class="stab" onclick="switchMil('fitest',this)">🏃 FIT TEST</div>
+    <div class="stab" onclick="switchMil('milprogram',this)">📅 PROGRAMS</div>
+    <div class="stab" onclick="switchMil('bodycheck',this)">⚖️ BODY CHECK</div>
+  </div>
+  <div id="milp-standards">
+    <div class="sub-tabs" style="margin-bottom:13px">
+      <div class="stab on" onclick="selectUnit(this,'seal')">🔱 SEAL</div>
+      <div class="stab" onclick="selectUnit(this,'special')">⚡ รบพิเศษ</div>
+      <div class="stab" onclick="selectUnit(this,'infantry')">🎖️ ทหารราบ</div>
+      <div class="stab" onclick="selectUnit(this,'police')">👮 ตำรวจ</div>
+    </div>
+    <div id="standards-display"></div>
+  </div>
+  <div id="milp-fitest" style="display:none">
+    <div class="sh"><div class="sh-title">LOG FITNESS TEST</div></div>
+    <div id="fit-test-wrap"></div>
+    <button class="tbtn full green mt8" onclick="saveFilTest()"><span>💾 SAVE RESULTS</span></button>
+    <div class="sh mt13"><div class="sh-title">TEST HISTORY</div></div>
+    <div id="fit-test-history"></div>
+  </div>
+  <div id="milp-milprogram" style="display:none">
+    <div class="stat-grid" id="milprog-grid" style="grid-template-columns:1fr 1fr"></div>
+    <div id="milprog-detail" style="display:none">
+      <button class="tbtn ghost sm mb13" onclick="document.getElementById('milprog-detail').style.display='none';document.getElementById('milprog-grid').style.display='grid'"><span>← BACK</span></button>
+      <div id="milprog-content"></div>
+    </div>
+  </div>
+  <div id="milp-bodycheck" style="display:none">
+    <div class="fc">
+      <div class="fc-title">BODY DATA</div>
+      <div class="fgrid t3 mb8">
+        <div class="ff"><div class="flbl">HEIGHT (cm)</div><input type="number" class="finp" id="bc-height" placeholder="175"></div>
+        <div class="ff"><div class="flbl">WEIGHT (kg)</div><input type="number" class="finp" id="bc-weight" placeholder="70" step=".1"></div>
+        <div class="ff"><div class="flbl">AGE</div><input type="number" class="finp" id="bc-age" placeholder="22"></div>
+      </div>
+      <button class="tbtn full" onclick="calcBodyCheck()"><span>⚡ ANALYZE</span></button>
+    </div>
+    <div id="body-check-result"></div>
+  </div>
+</div>
+
+<!-- ══ PANEL: RUN/ENDURANCE ══ -->
+<div id="panel-runtrack" class="panel">
+  <div class="run-hero">
+    <div class="run-ttl">🏃 ENDURANCE</div>
+    <div class="run-sub">วิ่ง · ว่ายน้ำ · SEAL PREP · INTERVAL</div>
+  </div>
+  <div class="sub-tabs">
+    <div class="stab green on" onclick="switchEndure('run',this)">🏃 RUN</div>
+    <div class="stab green" onclick="switchEndure('swim',this)">🏊 SWIM</div>
+    <div class="stab green" onclick="switchEndure('interval',this)">⚡ INTERVAL</div>
+  </div>
+
+  <!-- RUN SUB-PANEL -->
+  <div id="endure-run">
+    <div id="run-rule-banner"></div>
+    <div class="stat-grid" id="run-stats-row"></div>
+    <div class="fc">
+      <div class="fc-title green">LOG RUN</div>
+      <div class="fgrid t3 mb8">
+        <div class="ff"><div class="flbl">DIST (km)</div><input type="number" class="finp" id="run-dist" placeholder="3" step=".1" min=".1" oninput="liveRunPace()"></div>
+        <div class="ff"><div class="flbl">TIME (min)</div><input type="number" class="finp" id="run-time" placeholder="14.5" step=".1" min=".1" oninput="liveRunPace()"></div>
+        <div class="ff"><div class="flbl">TYPE</div><select class="finp" id="run-type"><option value="easy">EASY</option><option value="tempo">TEMPO</option><option value="interval">INTERVAL</option><option value="long">LONG</option><option value="race">RACE</option></select></div>
+      </div>
+      <div class="fgrid mb8">
+        <div class="ff"><div class="flbl">DATE</div><input type="date" class="finp" id="run-date"></div>
+        <div class="ff"><div class="flbl">HR (bpm)</div><input type="number" class="finp" id="run-hr" placeholder="145" min="60" max="220"></div>
+      </div>
+      <div class="ff mb8"><div class="flbl">NOTE</div><input type="text" class="finp" id="run-note" placeholder="เช่น รู้สึกดี, ขาหนัก"></div>
+      <div id="run-live-pace" class="live-pace">PACE: —</div>
+      <button class="tbtn green full" onclick="saveRunLog()"><span>💾 SAVE RUN</span></button>
+    </div>
+    <div class="chart-wrap" id="run-chart-section" style="display:none"><h3>PACE PROGRESS</h3><canvas class="prog-canvas" id="runPaceChart"></canvas></div>
+    <div class="sh"><div class="sh-title">RUN LOG</div></div>
+    <div id="run-history-list"></div>
+  </div>
+
+  <!-- SWIM SUB-PANEL -->
+  <div id="endure-swim" style="display:none">
+    <div class="swim-hero">
+      <div style="font-family:var(--fh);font-size:1.45rem;font-weight:900;letter-spacing:5px;color:var(--blue)">🏊 SWIM TRACKER</div>
+      <div style="font-family:var(--fm);font-size:.6rem;color:var(--blue-dim);letter-spacing:2px;margin-top:2px">SEAL STANDARD MONITOR</div>
+    </div>
+    <div class="stat-grid" id="swim-stats-row"></div>
+    <div class="fc" style="border-left:3px solid var(--blue-dim)">
+      <div class="fc-title blue">SEAL TARGETS</div>
+      <div class="swim-target-bar"><div class="swim-target-label"><span>200m PASS ≤5:00 | ELITE ≤4:00</span><span id="swim-200-display" style="color:var(--text-dim)">NO DATA</span></div><div class="swim-target-track"><div class="swim-target-fill" id="swim-200-bar" style="width:0%"></div></div></div>
+      <div class="swim-target-bar"><div class="swim-target-label"><span>500m PASS ≤13:00 | ELITE ≤10:00</span><span id="swim-500-display" style="color:var(--text-dim)">NO DATA</span></div><div class="swim-target-track"><div class="swim-target-fill" id="swim-500-bar" style="width:0%"></div></div></div>
+    </div>
+    <div class="fc">
+      <div class="fc-title blue">LOG SWIM</div>
+      <div class="fgrid t3 mb8">
+        <div class="ff"><div class="flbl">DIST (m)</div><input type="number" class="finp" id="sw-dist" placeholder="200" step="25" min="25" oninput="liveSwimPace()"></div>
+        <div class="ff"><div class="flbl">TIME (min)</div><input type="number" class="finp" id="sw-time" placeholder="4.5" step=".1" min=".1" oninput="liveSwimPace()"></div>
+        <div class="ff"><div class="flbl">STROKE</div><select class="finp" id="sw-stroke"><option value="freestyle">ฟรีสไตล์</option><option value="backstroke">กรรเชียง</option><option value="breaststroke">กบ</option><option value="butterfly">ผีเสื้อ</option><option value="mixed">ผสม</option></select></div>
+      </div>
+      <div class="fgrid mb8">
+        <div class="ff"><div class="flbl">DATE</div><input type="date" class="finp" id="sw-date"></div>
+        <div class="ff"><div class="flbl">LAPS</div><input type="number" class="finp" id="sw-laps" placeholder="8" min="1"></div>
+      </div>
+      <div class="ff mb8"><div class="flbl">NOTE</div><input type="text" class="finp" id="sw-note" placeholder="เช่น ต่อเนื่อง, หยุดพัก 2 ครั้ง"></div>
+      <div id="sw-live-pace" class="live-pace" style="color:var(--blue)">PACE: —</div>
+      <button class="tbtn blue full" onclick="saveSwimLog()"><span>💾 SAVE SWIM</span></button>
+    </div>
+    <div class="fc" style="border-left:3px solid var(--blue-dim)">
+      <div class="fc-title blue">SEAL PREP — 8 WEEKS</div>
+      <div id="swim-program-display"></div>
+    </div>
+    <div class="chart-wrap" id="swim-chart-section" style="display:none"><h3>SWIM PACE (s/100m)</h3><canvas class="prog-canvas" id="swimPaceChart"></canvas></div>
+    <div class="sh"><div class="sh-title">SWIM LOG</div></div>
+    <div id="swim-history-list"></div>
+  </div>
+
+  <!-- INTERVAL SUB-PANEL -->
+  <div id="endure-interval" style="display:none">
+    <div class="fc">
+      <div class="fc-title green">INTERVAL GENERATOR</div>
+      <div class="fgrid mb8">
+        <div class="ff"><div class="flbl">GOAL 3KM (min)</div><input type="number" class="finp" id="int-goal" placeholder="13" step=".5" min="8" max="25" oninput="previewInterval()"></div>
+        <div class="ff"><div class="flbl">PHASE</div><select class="finp" id="int-phase" onchange="previewInterval()"><option value="base">BASE (Zone 2)</option><option value="build">BUILD (Tempo+Interval)</option><option value="peak">PEAK (Race Specific)</option><option value="taper">TAPER (Pre-exam)</option></select></div>
+      </div>
+      <div id="interval-preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANEL: MORE ══ -->
+<div id="panel-more" class="panel">
+  <div id="prof-hero-wrap"></div>
+  <div id="prof-complete-wrap"></div>
+  <div class="mitem" onclick="goSubPanel('panel-history')"><div class="mico">📋</div><div class="mtxt"><div class="mtitle">HISTORY & PROGRESS</div><div class="mdesc">ประวัติการออกกำลังกาย · กราฟ Progress</div></div><div class="marr">▶</div></div>
+  <div class="mitem" onclick="goSubPanel('panel-preset')"><div class="mico">📦</div><div class="mtxt"><div class="mtitle">PROGRAMS</div><div class="mdesc">PPL · Full Body · Upper/Lower · Calisthenics</div></div><div class="marr">▶</div></div>
+  <div class="mitem" onclick="goSubPanel('panel-aiplanner')"><div class="mico">⚙️</div><div class="mtxt"><div class="mtitle">SMART PLANNER</div><div class="mdesc">สร้างตาราง · บันทึกโปรแกรม</div></div><div class="marr">▶</div></div>
+  <div class="mitem" onclick="goSubPanel('panel-countdown')"><div class="mico">📅</div><div class="mtxt"><div class="mtitle">COUNTDOWN</div><div class="mdesc">วันสอบ · Phase advisor · เหลืออีกกี่วัน</div></div><div class="marr">▶</div></div>
+  <div class="mitem" onclick="goSubPanel('panel-readiness')"><div class="mico">⚡</div><div class="mtxt"><div class="mtitle">DAILY READINESS</div><div class="mdesc">ตรวจความพร้อมก่อนซ้อม · Readiness Score</div></div><div class="marr">▶</div></div>
+  <div class="mitem" onclick="goSubPanel('panel-import')"><div class="mico">📥</div><div class="mtxt"><div class="mtitle">IMPORT</div><div class="mdesc">วางข้อความ · CSV · Excel</div></div><div class="marr">▶</div></div>
+  <div class="mitem" onclick="goSubPanel('panel-export')"><div class="mico">📤</div><div class="mtxt"><div class="mtitle">EXPORT / BACKUP</div><div class="mdesc">CSV · JSON · Restore</div></div><div class="marr">▶</div></div>
+  <div class="mitem" onclick="goSubPanel('panel-profile')"><div class="mico">👤</div><div class="mtxt"><div class="mtitle">PROFILE</div><div class="mdesc">ข้อมูลส่วนตัว · เป้าหมาย · 1RM</div></div><div class="marr">▶</div></div>
+</div>
+
+<!-- ══ SUB-PANELS (accessible from More) ══ -->
+<div id="panel-history" class="panel">
+  <div class="sh"><div class="sh-title">HISTORY</div><button class="tbtn xs red" onclick="clearHist()"><span>CLR ALL</span></button></div>
+  <div class="filters" id="hist-filters"></div>
+  <div class="chart-wrap" id="chart-section" style="display:none"><h3 id="chart-title">PROGRESS</h3><canvas class="prog-canvas" id="progChart"></canvas></div>
+  <div id="hist-list"></div>
+  <button class="tbtn ghost sm full mt8" onclick="goSubPanel('panel-more')"><span>← BACK</span></button>
+</div>
+
+<div id="panel-preset" class="panel">
+  <div class="sh"><div class="sh-title">PROGRAMS</div></div>
+  <div class="preset-grid" id="preset-grid"></div>
+  <div id="preset-detail" style="display:none">
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px">
+      <button class="tbtn sm ghost" onclick="document.getElementById('preset-detail').style.display='none';document.getElementById('preset-grid').style.display='grid'"><span>← BACK</span></button>
+      <div style="font-family:var(--fh);font-size:1rem;font-weight:900;letter-spacing:3px;color:var(--orange)" id="preset-detail-name"></div>
+    </div>
+    <div class="day-tabs" id="day-tabs"></div>
+    <div class="preset-exs" id="preset-exs"></div>
+    <button class="tbtn full mt8" id="load-preset-btn"><span>▶ LOAD INTO SESSION</span></button>
+  </div>
+  <button class="tbtn ghost sm full mt8" onclick="goSubPanel('panel-more')"><span>← BACK</span></button>
+</div>
+
+<div id="panel-import" class="panel">
+  <div class="sh"><div class="sh-title">IMPORT</div></div>
+  <div class="methods">
+    <div class="mth on" id="m-text" onclick="setMethod('text')"><span class="mi">📝</span>วางข้อความ</div>
+    <div class="mth" id="m-csv" onclick="setMethod('csv')"><span class="mi">📊</span>CSV / Excel</div>
+  </div>
+  <div class="import-zone">
+    <div id="zone-text"><textarea class="finp" id="itxt" style="min-height:110px;background:transparent;border:none;outline:none;" placeholder="วางตารางออกกำลังกายที่นี่...&#10;&#10;ตัวอย่าง:&#10;Bench Press 4x10 80kg&#10;Squat 3×8 100kg"></textarea></div>
+    <div id="zone-csv" style="display:none">
+      <div class="drop-a" id="drop-csv" onclick="document.getElementById('csvInp').click()"><span class="di">📂</span>คลิกหรือลากไฟล์มาวาง<br><span style="font-size:.68rem;color:var(--text-dead);margin-top:3px;display:block">.csv .txt</span></div>
+      <input type="file" id="csvInp" class="file-inp" accept=".csv,.txt" onchange="onCSVFile(event)">
+      <div id="csvPrev"></div>
+    </div>
+  </div>
+  <button class="tbtn teal full" onclick="runParse()"><span>⚡ PARSE</span></button>
+  <div id="parse-result"></div>
+  <button class="tbtn ghost sm full mt8" onclick="goSubPanel('panel-more')"><span>← BACK</span></button>
+</div>
+
+<div id="panel-aiplanner" class="panel">
+  <div class="sh"><div class="sh-title">SMART PLANNER</div></div>
+  <div id="planner-status" style="border-radius:3px;padding:10px 12px;margin-bottom:12px;font-family:var(--fm);font-size:.72rem;border:1px solid var(--wire);letter-spacing:1px"></div>
+  <div class="sub-tabs" style="margin-bottom:12px">
+    <div class="stab on" onclick="switchPlanner('generate',this)">⚙️ GENERATE</div>
+    <div class="stab" onclick="switchPlanner('saved',this)">📋 SAVED</div>
+  </div>
+  <div id="pp-generate">
+    <div class="style-grid">
+      <div class="style-card on" data-style="hypertrophy" onclick="selectPlanStyle('hypertrophy',this)"><h4>💪 HYPERTROPHY</h4><p>8-12 reps · สร้างกล้าม</p></div>
+      <div class="style-card" data-style="strength" onclick="selectPlanStyle('strength',this)"><h4>🏋️ STRENGTH</h4><p>3-6 reps · Heavy</p></div>
+      <div class="style-card" data-style="fat_loss" onclick="selectPlanStyle('fat_loss',this)"><h4>🔥 FAT LOSS</h4><p>Circuit · พัก 45s</p></div>
+      <div class="style-card" data-style="endurance" onclick="selectPlanStyle('endurance',this)"><h4>🏃 ENDURANCE</h4><p>15-20 reps</p></div>
+    </div>
+    <div class="fgrid mb13">
+      <div class="ff"><div class="flbl">WEEK</div><select class="finp" id="gen-week"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 (Deload)</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8 (Deload)</option><option value="12">12 (Peak)</option></select></div>
+      <div class="ff"><div class="flbl">FOCUS</div><select class="finp" id="gen-focus"><option value="">BALANCED</option><option value="chest">CHEST+SHOULDER</option><option value="back">BACK</option><option value="legs">LEGS</option><option value="arms">ARMS</option></select></div>
+    </div>
+    <button class="tbtn full" onclick="generatePlan()"><span>⚙ GENERATE PLAN</span></button>
+    <div id="gen-result"></div>
+  </div>
+  <div id="pp-saved" style="display:none"><div id="saved-plans-list"></div></div>
+  <button class="tbtn ghost sm full mt8" onclick="goSubPanel('panel-more')"><span>← BACK</span></button>
+</div>
+
+<div id="panel-countdown" class="panel">
+  <div class="sh"><div class="sh-title">EXAM COUNTDOWN</div></div>
+  <div class="cd-hero">
+    <div style="font-family:var(--fm);font-size:.6rem;color:var(--orange-lo);letter-spacing:3px;text-transform:uppercase;margin-bottom:3px">DAYS REMAINING</div>
+    <div class="cd-big" id="cd-days-display">—</div>
+    <div class="cd-lbl" id="cd-days-label">ADD EXAM DATE BELOW</div>
+    <div id="cd-phase-display"></div>
+  </div>
+  <div id="cd-progress-wrap" style="display:none;margin-bottom:13px">
+    <div style="display:flex;justify-content:space-between;font-family:var(--fm);font-size:.6rem;color:var(--text-dim);margin-bottom:4px"><span>START PREP</span><span id="cd-progress-pct" style="color:var(--orange)"></span><span>EXAM DAY</span></div>
+    <div style="height:5px;background:var(--trench);border-radius:2px;overflow:hidden"><div id="cd-progress-bar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--teal));border-radius:2px;width:0%"></div></div>
+    <div class="phase-timeline" id="cd-phase-timeline"></div>
+  </div>
+  <div id="exam-list-display" class="mb13"></div>
+  <div class="fc">
+    <div class="fc-title">ADD EXAM</div>
+    <div class="fgrid mb8">
+      <div class="ff"><div class="flbl">EXAM NAME</div><input type="text" class="finp" id="cd-name" placeholder="เช่น สอบตำรวจ 2568"></div>
+      <div class="ff"><div class="flbl">UNIT</div><select class="finp" id="cd-unit"><option value="police">👮 ตำรวจ/สวาท</option><option value="military">🎖️ ทหารราบ</option><option value="special">⚡ รบพิเศษ</option><option value="seal">🔱 หน่วยซีล</option><option value="other">🎯 อื่นๆ</option></select></div>
+    </div>
+    <div class="fgrid mb8">
+      <div class="ff"><div class="flbl">DATE</div><input type="date" class="finp" id="cd-date"></div>
+      <div class="ff"><div class="flbl">PREP DAYS</div><input type="number" class="finp" id="cd-prep-days" value="90" min="7" max="365"></div>
+    </div>
+    <button class="tbtn full" onclick="addExam()"><span>+ ADD EXAM</span></button>
+  </div>
+  <div class="fc"><div class="fc-title">PHASE INTEL</div><div id="cd-phase-advice"><div style="font-family:var(--fm);font-size:.72rem;color:var(--text-dead)">ADD EXAM DATE TO SEE ADVICE</div></div></div>
+  <button class="tbtn ghost sm full mt8" onclick="goSubPanel('panel-more')"><span>← BACK</span></button>
+</div>
+
+<div id="panel-readiness" class="panel">
+  <div class="ready-hero">
+    <div class="ready-big" id="ready-score-display">—</div>
+    <div class="ready-lbl" id="ready-label">MOVE SLIDERS BELOW</div>
+  </div>
+  <div id="ready-recommendation" style="display:none;margin-bottom:11px"></div>
+  <div class="fc"><div class="fc-title purple">🌙 RECOVERY</div>
+    <div class="slider-row"><div class="slbl"><span>😴 SLEEP HRS</span><span id="sleep-val">7</span></div><input type="range" id="r-sleep" min="2" max="12" step=".5" value="7" oninput="document.getElementById('sleep-val').textContent=this.value;calcReadiness()"></div>
+    <div class="slider-row"><div class="slbl"><span>🌟 SLEEP QUALITY</span><span id="sleep-q-val">3</span>/5</div><input type="range" id="r-sleep-q" min="1" max="5" step="1" value="3" oninput="document.getElementById('sleep-q-val').textContent=this.value;calcReadiness()"></div>
+  </div>
+  <div class="fc"><div class="fc-title purple">💪 PHYSICAL</div>
+    <div class="slider-row"><div class="slbl"><span>⚡ ENERGY</span><span id="energy-val">3</span>/5</div><input type="range" id="r-energy" min="1" max="5" step="1" value="3" oninput="document.getElementById('energy-val').textContent=this.value;calcReadiness()"></div>
+    <div class="slider-row"><div class="slbl"><span>🦵 SORENESS (1=ok 5=very)</span><span id="sore-val">2</span>/5</div><input type="range" id="r-sore" min="1" max="5" step="1" value="2" oninput="document.getElementById('sore-val').textContent=this.value;calcReadiness()"></div>
+    <div class="slider-row"><div class="slbl"><span>❤️ RESTING HR</span><span id="hr-val">60</span> bpm</div><input type="range" id="r-rhr" min="40" max="100" step="1" value="60" oninput="document.getElementById('hr-val').textContent=this.value;calcReadiness()"></div>
+  </div>
+  <div class="fc"><div class="fc-title purple">🧠 MENTAL</div>
+    <div class="slider-row"><div class="slbl"><span>🎯 MOTIVATION</span><span id="motiv-val">3</span>/5</div><input type="range" id="r-motiv" min="1" max="5" step="1" value="3" oninput="document.getElementById('motiv-val').textContent=this.value;calcReadiness()"></div>
+    <div class="slider-row"><div class="slbl"><span>😰 STRESS (1=calm 5=high)</span><span id="stress-val">2</span>/5</div><input type="range" id="r-stress" min="1" max="5" step="1" value="2" oninput="document.getElementById('stress-val').textContent=this.value;calcReadiness()"></div>
+  </div>
+  <button class="tbtn green full mb8" onclick="saveReadinessLog()"><span>💾 SAVE TODAY</span></button>
+  <div class="sh"><div class="sh-title">7 DAY LOG</div></div>
+  <div id="readiness-history"></div>
+  <button class="tbtn ghost sm full mt8" onclick="goSubPanel('panel-more')"><span>← BACK</span></button>
+</div>
+
+<div id="panel-profile" class="panel">
+  <div id="profile-hero-wrap"></div>
+  <div id="profile-completeness-wrap"></div>
+  <div class="fc"><div class="fc-title">BASIC INFO</div>
+    <div class="fgrid mb8"><div class="ff"><div class="flbl">NAME</div><input type="text" class="finp" id="p-name" placeholder="เช่น วิน"></div><div class="ff"><div class="flbl">SEX</div><select class="finp" id="p-sex"><option value="">--</option><option value="male">ชาย</option><option value="female">หญิง</option><option value="other">อื่นๆ</option></select></div></div>
+    <div class="fgrid t3 mb8"><div class="ff"><div class="flbl">AGE</div><input type="number" class="finp" id="p-age" placeholder="25" min="10" max="100"></div><div class="ff"><div class="flbl">HEIGHT (cm)</div><input type="number" class="finp" id="p-height" placeholder="175"></div><div class="ff"><div class="flbl">WEIGHT (kg)</div><input type="number" class="finp" id="p-weight" placeholder="70" step=".1"></div></div>
+  </div>
+  <div class="fc"><div class="fc-title">PRIMARY OBJECTIVE</div>
+    <div class="goal-grid" id="goal-grid">
+      <div class="goal-chip" data-goal="muscle" onclick="toggleGoal('muscle')"><span class="gc-icon">💪</span><div class="gc-name">สร้างกล้ามเนื้อ</div><div class="gc-desc">Hypertrophy</div></div>
+      <div class="goal-chip" data-goal="fat_loss" onclick="toggleGoal('fat_loss')"><span class="gc-icon">🔥</span><div class="gc-name">ลดไขมัน</div><div class="gc-desc">Fat Loss</div></div>
+      <div class="goal-chip" data-goal="strength" onclick="toggleGoal('strength')"><span class="gc-icon">🏋️</span><div class="gc-name">ความแข็งแกร่ง</div><div class="gc-desc">Strength</div></div>
+      <div class="goal-chip" data-goal="seal_test" onclick="toggleGoal('seal_test')"><span class="gc-icon">🔱</span><div class="gc-name">สอบหน่วยซีล</div><div class="gc-desc">ว่ายน้ำ · วิ่ง · Cals</div></div>
+      <div class="goal-chip" data-goal="military_general" onclick="toggleGoal('military_general')"><span class="gc-icon">🎖️</span><div class="gc-name">ทหารราบ</div><div class="gc-desc">ดันพื้น · วิ่ง</div></div>
+      <div class="goal-chip" data-goal="endurance" onclick="toggleGoal('endurance')"><span class="gc-icon">🏃</span><div class="gc-name">ความอดทน</div><div class="gc-desc">Cardio · Endurance</div></div>
+      <div class="goal-chip" data-goal="police" onclick="toggleGoal('police')"><span class="gc-icon">👮</span><div class="gc-name">สอบตำรวจ</div><div class="gc-desc">วิ่ง · ดันพื้น</div></div>
+      <div class="goal-chip" data-goal="health" onclick="toggleGoal('health')"><span class="gc-icon">❤️</span><div class="gc-name">สุขภาพทั่วไป</div><div class="gc-desc">Active · Wellness</div></div>
+    </div>
+    <div id="goal-counter" style="text-align:right;font-family:var(--fm);font-size:.6rem;color:var(--text-dead);margin-top:7px">SELECTED: 0/4</div>
+  </div>
+  <div class="fc"><div class="fc-title">EXPERIENCE</div>
+    <div class="fgrid mb8"><div class="ff"><div class="flbl">LEVEL</div><select class="finp" id="p-level"><option value="">--</option><option value="beginner">BEGINNER</option><option value="intermediate">INTERMEDIATE</option><option value="advanced">ADVANCED</option></select></div><div class="ff"><div class="flbl">DAYS/WEEK</div><select class="finp" id="p-days"><option value="">--</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div></div>
+    <div class="fgrid mb8"><div class="ff"><div class="flbl">MIN/SESSION</div><select class="finp" id="p-duration"><option value="">--</option><option value="45">45</option><option value="60">60</option><option value="75">75</option><option value="90">90</option></select></div><div class="ff"><div class="flbl">EQUIPMENT</div><select class="finp" id="p-equipment"><option value="full_gym">FULL GYM</option><option value="home">HOME / BW</option><option value="barbell">BARBELL ONLY</option></select></div></div>
+  </div>
+  <div class="fc"><div class="fc-title">1RM REFERENCE</div>
+    <div class="fgrid t3"><div class="ff"><div class="flbl">SQUAT (kg)</div><input type="number" class="finp" id="p-squat1rm" placeholder="100" step="2.5"></div><div class="ff"><div class="flbl">BENCH (kg)</div><input type="number" class="finp" id="p-bench1rm" placeholder="80" step="2.5"></div><div class="ff"><div class="flbl">DEADLIFT (kg)</div><input type="number" class="finp" id="p-dead1rm" placeholder="120" step="2.5"></div></div>
+  </div>
+  <button class="tbtn full mb8" onclick="saveProfile()"><span>💾 SAVE PROFILE</span></button>
+  <button class="tbtn ghost sm full" onclick="goSubPanel('panel-more')"><span>← BACK</span></button>
+</div>
+
+<div id="panel-export" class="panel">
+  <div class="sh"><div class="sh-title">EXPORT / BACKUP</div></div>
+  <div class="export-grid">
+    <div class="exp-card" onclick="exportCSV()"><span class="ei2">📊</span><h3>CSV</h3><p>Excel / Sheets</p></div>
+    <div class="exp-card" onclick="exportJSON()"><span class="ei2">📦</span><h3>JSON</h3><p>Full Backup</p></div>
+    <div class="exp-card" onclick="exportText()"><span class="ei2">📋</span><h3>TEXT</h3><p>Human readable</p></div>
+    <div class="exp-card" onclick="importBackup()"><span class="ei2">📥</span><h3>RESTORE</h3><p>Load JSON backup</p><input type="file" id="backup-inp" class="file-inp" accept=".json" onchange="loadBackup(event)"></div>
+  </div>
+  <div style="margin-top:16px;padding-top:13px;border-top:1px solid var(--wire)">
+    <div style="font-family:var(--fm);font-size:.6rem;color:var(--text-dead);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">⚠️ DANGER ZONE</div>
+    <button class="danger-btn" onclick="confirmReset()">🗑️ RESET ALL DATA</button>
+  </div>
+  <button class="tbtn ghost sm full mt8" onclick="goSubPanel('panel-more')"><span>← BACK</span></button>
+</div>
+
+<!-- ══ REST BAR ══ -->
+<div class="restbar" id="restbar">
+  <div class="rest-lbl">REST</div>
+  <div class="rest-cd" id="rest-cd">1:30</div>
+  <div class="rest-trk"><div class="rest-fill" id="rest-fill" style="width:100%"></div></div>
+  <div class="rest-sc">
+    <div class="rsc" onclick="startRest(30)">30s</div>
+    <div class="rsc" onclick="startRest(60)">1m</div>
+    <div class="rsc" onclick="startRest(90)">1:30</div>
+    <div class="rsc" onclick="startRest(120)">2m</div>
+    <div class="rsc" onclick="startRest(180)">3m</div>
+  </div>
+  <button class="tbtn xs red" onclick="stopRest()"><span>✕</span></button>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="botnav">
+  <button class="ntab on" id="ntab-workout" onclick="goTab('workout')"><div class="ntico">🏋️</div><div class="nlbl">Workout</div></button>
+  <button class="ntab" id="ntab-dashboard" onclick="goTab('dashboard')"><div class="ntico">📊</div><div class="nlbl">Sitrep</div></button>
+  <button class="ntab" id="ntab-military" onclick="goTab('military')"><div class="ntico">⚔️</div><div class="nlbl">Military</div></button>
+  <button class="ntab" id="ntab-runtrack" onclick="goTab('runtrack')"><div class="ntico">🏃</div><div class="nlbl">Endure</div></button>
+  <button class="ntab" id="ntab-more" onclick="goTab('more')"><div class="ntico">◈</div><div class="nlbl">More</div></button>
+</nav>
+
+<!-- ══ MODALS ══ -->
+<div class="ov" id="ov-add" onclick="if(event.target===this)closeOv('ov-add')">
+  <div class="sheet">
+    <div class="sheet-title">NEW OBJECTIVE</div>
+    <div class="field"><label>EXERCISE NAME</label><input type="text" id="nn" placeholder="e.g. BENCH PRESS"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="field"><label>SETS</label><input type="number" id="ns" value="3" min="1" max="30"></div>
+      <div class="field"><label>REPS</label><input type="text" id="nr" placeholder="10 หรือ 8-12"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="field"><label>WEIGHT (kg)</label><input type="number" id="nw" placeholder="0" step=".5"></div>
+      <div class="field"><label>RPE (1-10)</label><input type="number" id="nrpe" placeholder="8" min="1" max="10" step=".5"></div>
+    </div>
+    <div class="sheet-acts">
+      <button class="tbtn full" onclick="addEx()"><span>DEPLOY</span></button>
+      <button class="tbtn ghost" onclick="closeOv('ov-add')"><span>ABORT</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov-log" onclick="if(event.target===this)closeOv('ov-log')">
+  <div class="sheet">
+    <div class="sheet-title">LOG RESULT</div>
+    <div id="log-body"></div>
+    <div class="sheet-acts">
+      <button class="tbtn green full" onclick="saveLog()"><span>💾 SAVE</span></button>
+      <button class="tbtn ghost" onclick="closeOv('ov-log')"><span>CANCEL</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov-sw" onclick="if(event.target===this)closeOv('ov-sw')">
+  <div class="sheet" style="max-width:300px">
+    <div class="sheet-title">STOPWATCH</div>
+    <div style="text-align:center;padding:14px 0 10px">
+      <div id="sw-time" style="font-family:var(--fm);font-size:2.8rem;color:var(--green);letter-spacing:3px;text-shadow:0 0 14px rgba(74,255,110,.3)">00:00:00</div>
+    </div>
+    <div id="sw-laps" style="max-height:120px;overflow-y:auto;margin-bottom:10px"></div>
+    <div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+      <button class="tbtn" id="sw-start-btn" onclick="swToggle()"><span>START</span></button>
+      <button class="tbtn ghost" onclick="swLap()"><span>LAP</span></button>
+      <button class="tbtn ghost" onclick="swReset()"><span>RESET</span></button>
+    </div>
+    <button class="tbtn ghost full" onclick="closeOv('ov-sw')"><span>CLOSE</span></button>
+  </div>
+</div>
+
+<div class="ov" id="ov-export-text" onclick="if(event.target===this)closeOv('ov-export-text')">
+  <div class="sheet" style="max-width:500px">
+    <div class="sheet-title">EXPORT TEXT</div>
+    <textarea id="export-txt" class="export-textarea"></textarea>
+    <div class="sheet-acts">
+      <button class="tbtn" onclick="safeCopy(document.getElementById('export-txt').value)"><span>COPY</span></button>
+      <button class="tbtn ghost" onclick="closeOv('ov-export-text')"><span>CLOSE</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="ov-reset" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:14px;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="sheet" style="max-width:320px;border-color:#d6282855;border-radius:8px 8px 0 0">
+    <div style="text-align:center;font-size:1.8rem;margin-bottom:7px">⚠️</div>
+    <div style="font-family:var(--fh);font-size:1.1rem;font-weight:900;letter-spacing:3px;color:var(--red);text-align:center;margin-bottom:7px">CONFIRM RESET</div>
+    <p style="font-family:var(--fm);font-size:.7rem;color:var(--text-dim);text-align:center;line-height:1.7;margin:8px 0 13px">ALL DATA WILL BE DELETED<br><strong style="color:var(--red)">CANNOT BE UNDONE</strong></p>
+    <div style="font-family:var(--fm);font-size:.65rem;color:var(--text-dim);margin-bottom:7px;text-align:center;letter-spacing:1px">TYPE "ยืนยัน" TO CONFIRM</div>
+    <input type="text" id="reset-confirm-input" placeholder="ยืนยัน" style="width:100%;text-align:center;border-color:#d6282855;margin-bottom:11px;background:var(--trench);border:1px solid #d6282855;color:var(--text-hi);padding:9px;font-family:var(--fm);font-size:.82rem;border-radius:3px;outline:none;" oninput="const ok=this.value==='ยืนยัน';const b=document.getElementById('reset-confirm-btn');b.disabled=!ok;">
+    <div style="display:flex;gap:7px">
+      <button class="tbtn ghost" style="flex:1" onclick="document.getElementById('ov-reset').style.display='none'"><span>CANCEL</span></button>
+      <button id="reset-confirm-btn" class="confirm-btn" disabled onclick="doReset()">🗑️ RESET</button>
+    </div>
+  </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div id="pwa-install">
+  <span style="flex:1">📲 ADD TO HOME SCREEN: Share → Add to Home Screen</span>
+  <button onclick="this.parentElement.style.display='none';localStorage.setItem('wk_install_dismissed','1')">✕</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ SCRIPTS ══ -->
+<script src="/src/app/app.ts" type="module"></script>
+<script>
+// ════════════════════════════════════════════
+//  INLINE BOOTSTRAP — wires HTML to TypeScript
+//  app.ts handles all business logic via store
+//  These are just UI glue functions
+// ════════════════════════════════════════════
+
+// ── Navigation ─────────────────────────────
+const ALL_PANELS=['workout','dashboard','military','runtrack','more',
+  'history','preset','import','aiplanner','countdown','readiness',
+  'profile','export'];
+const MAIN_TABS=['workout','dashboard','military','runtrack','more'];
+
+function goTab(id){
+  ALL_PANELS.forEach(p=>{const el=document.getElementById('panel-'+p);if(el)el.classList.remove('on');});
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('panel-'+id)?.classList.add('on');
+  document.getElementById('ntab-'+id)?.classList.add('on');
+  // Update mission name
+  const names={workout:'WORKOUT',dashboard:'SITREP',military:'MILITARY',runtrack:'ENDURANCE',more:'COMMAND'};
+  document.getElementById('mission-name').textContent=names[id]||id.toUpperCase();
+}
+
+function goSubPanel(id){
+  ALL_PANELS.forEach(p=>{const el=document.getElementById('panel-'+p);if(el)el.classList.remove('on');});
+  document.getElementById(id)?.classList.add('on');
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('ntab-more')?.classList.add('on');
+  const n=id.replace('panel-','').toUpperCase();
+  document.getElementById('mission-name').textContent=n;
+}
+
+// Sub-tabs inside panels
+function switchDash(tab,el){
+  document.querySelectorAll('.dash-pnl').forEach(p=>p.style.display='none');
+  document.getElementById('dash-'+tab).style.display='block';
+  document.querySelectorAll('#panel-dashboard .stab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+}
+function switchMil(tab,el){
+  ['milp-standards','milp-fitest','milp-milprogram','milp-bodycheck'].forEach(id=>{
+    const e=document.getElementById(id);if(e)e.style.display='none';
+  });
+  document.getElementById('milp-'+tab).style.display='block';
+  document.querySelectorAll('#panel-military .stab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  if(tab==='standards')renderStandards();
+  if(tab==='fitest')renderFitTest();
+  if(tab==='milprogram')renderMilPrograms();
+}
+function switchEndure(tab,el){
+  ['endure-run','endure-swim','endure-interval'].forEach(id=>{
+    const e=document.getElementById(id);if(e)e.style.display='none';
+  });
+  document.getElementById('endure-'+tab).style.display='block';
+  document.querySelectorAll('#panel-runtrack .stab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+}
+function switchPlanner(tab,el){
+  ['pp-generate','pp-saved'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('pp-'+tab).style.display='block';
+  document.querySelectorAll('#panel-aiplanner .stab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+  if(tab==='saved')renderSavedPlans();
+}
+
+// ── Overlays ───────────────────────────────
+function openOv(id){document.getElementById(id).classList.add('on');}
+function closeOv(id){document.getElementById(id).classList.remove('on');}
+function openAddEx(){
+  ['nn','nr','nw','nrpe'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ns').value='3';
+  openOv('ov-add');
+  setTimeout(()=>document.getElementById('nn').focus(),300);
+}
+function openSW(){openOv('ov-sw');}
+
+// ── Toast ───────────────────────────────────
+let _tt;
+function showToast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show'+(type?' '+type:'');
+  clearTimeout(_tt);_tt=setTimeout(()=>el.className='toast',2500);
+}
+
+// ── Init date fields ───────────────────────
+function initDates(){
+  const today=new Date().toISOString().split('T')[0];
+  ['run-date','sw-date'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today;});
+  document.getElementById('sess-date').textContent=
+    new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}).toUpperCase();
+}
+
+// ── Plan style select ──────────────────────
+let _planStyle='hypertrophy';
+function selectPlanStyle(style,el){
+  _planStyle=style;
+  document.querySelectorAll('.style-card').forEach(c=>c.classList.remove('on'));
+  if(el)el.classList.add('on');
+}
+
+// ── Reset confirm ──────────────────────────
+function confirmReset(){
+  document.getElementById('reset-confirm-input').value='';
+  document.getElementById('reset-confirm-btn').disabled=true;
+  document.getElementById('ov-reset').style.display='flex';
+}
+
+// ── Export text helper ─────────────────────
+function exportText(){
+  // Calls app.ts via window
+  if(window._exportText)window._exportText();
+  else openOv('ov-export-text');
+}
+function safeCopy(txt){
+  navigator.clipboard?.writeText(txt).then(()=>showToast('COPIED ✓','g')).catch(()=>showToast('CTRL+A → CTRL+C'));
+}
+
+// ── PWA ────────────────────────────────────
+if('serviceWorker'in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js')
+      .then(r=>console.log('[SW] registered',r.scope))
+      .catch(e=>console.warn('[SW] failed',e));
+  });
+}
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone=window.navigator.standalone;
+if(isIOS&&!isStandalone&&!localStorage.getItem('wk_install_dismissed')){
+  document.getElementById('pwa-install').classList.add('show');
+}
+
+// ── Bootstrap ─────────────────────────────
+document.addEventListener('DOMContentLoaded',initDates);
+</script>
+</body>
+</html>
